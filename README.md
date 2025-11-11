@@ -77,7 +77,6 @@ if __name__ == "__main__":
 ```
 ## OUTPUT
 <img width="1919" height="1141" alt="Screenshot 2025-11-11 195804" src="https://github.com/user-attachments/assets/419d21aa-0cbd-4786-a5ea-f84a45a1d036" />
-<img width="659" height="355" alt="Screenshot 2025-11-11 200055" src="https://github.com/user-attachments/assets/5b28a258-6253-4036-9172-af38b46cdc29" />
 
 
 ## Result
