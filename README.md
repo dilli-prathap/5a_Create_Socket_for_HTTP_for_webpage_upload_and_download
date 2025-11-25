@@ -16,49 +16,64 @@ To write a PYTHON program for socket for HTTP for web page upload and download
 6.Stop the program
 <BR>
 ## Program 
-## CLIENT:
+
 ```python
 import socket
-c = socket.socket()
-c.connect(('localhost', 8080))
-n = int(input("Enter number of frames to send: "))
-for i in range(n):
-    frame = f"Frame {i+1}"
-    c.send(frame.encode())
-    ack = c.recv(1024).decode()
-    print(f"Server reply for {frame}: {ack}")
-    if ack == "NACK":
-        print("Resending frame...")
-        c.send(frame.encode())
-        print("Resent:", c.recv(1024).decode())
-c.send(b"exit")
-c.close()
-print("Client closed.")
-```
-## SERVER:
-```PYTHON
-import socket
-import random
-s = socket.socket()
-s.bind(('localhost', 8080))
-s.listen(1)
-print("Server listening...")
-conn, addr = s.accept()
-print("Connected from:", addr)
-while True:
-    data = conn.recv(1024).decode()
-    if not data or data.lower() == 'exit':
-        break
-    print("Received:", data)
-    # Randomly simulate ACK or NACK
-    ack = "ACK" if random.choice([True, False]) else "NACK"
-    conn.send(ack.encode())
-conn.close()
-s.close()
-print("Server closed.")
+
+
+def send_request(host, port, request):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((host, port))
+        s.sendall(request.encode())
+        response = s.recv(4096).decode()
+    return response
+
+
+def upload_file(host, port, filename):
+    with open(filename, 'rb') as file:
+        file_data = file.read()
+        content_length = len(file_data)
+
+        request = (
+            f"POST /upload HTTP/1.1\r\n"
+            f"Host: {host}\r\n"
+            f"Content-Length: {content_length}\r\n"
+            f"Content-Type: text/plain\r\n"
+            f"\r\n"
+        )
+        request = request + file_data.decode(errors='ignore')
+    
+    response = send_request(host, port, request)
+    return response
+
+
+def download_file(host, port, filename):
+    request = f"GET /{filename} HTTP/1.1\r\nHost: {host}\r\n\r\n"
+    response = send_request(host, port, request)
+
+    parts = response.split('\r\n\r\n', 1)
+    if len(parts) > 1:
+        file_content = parts[1]
+        with open('downloaded_' + filename, 'wb') as file:
+            file.write(file_content.encode())
+        print(f"{filename} downloaded successfully.")
+    else:
+        print("Error: No file content found in response.")
+
+
+if __name__ == "__main__":
+    host = 'example.com'   # Replace with a real server or localhost
+    port = 80              # HTTP default port
+
+    # Upload file
+    upload_response = upload_file(host, port, 'example.txt')
+    print("Upload response:", upload_response)
+
+    # Download file
+    download_file(host, port, 'example.txt')
 ```
 ## OUTPUT
-<img width="1045" height="544" alt="513800135-b208d103-495b-4e4a-8059-66b2b82142d5" src="https://github.com/user-attachments/assets/7f36e733-fd62-4c19-b74b-6f4c46f25e7e" />
+<img width="1009" height="498" alt="516766164-92100548-c4bf-4aba-9f05-4535011b09a9" src="https://github.com/user-attachments/assets/4801dc79-2f78-4024-b7d3-054132be9984" />
 
 
 ## Result
